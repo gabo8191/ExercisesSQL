@@ -1,0 +1,556 @@
+-- Creaci n total de la base de datos
+-- Creado por: BD II
+-- Fecha de creaci n: 04/09/2023
+-- Observaciones:
+
+--CREACION USUARIO (Solo para versi n de escritorio para la versi n live elimine estas l neas)
+-- CREATE USER COMPLEJOS IDENTIFIED BY A123;
+-- GRANT RESOURCE, CONNECT TO COMPLEJOS;
+-- CONN COMPLEJOS/A123;
+
+--CREACION DE TABLAS
+
+CREATE TABLE lugares (
+ id_lugar	NUMBER		NOT NULL,
+ nombre_lugar	VARCHAR2(30)	NOT NULL,
+ tipo_lugar 	CHAR(1) 	NOT NULL,
+ id_ubicacion 	NUMBER			,
+ CONSTRAINT lug_pk_idl PRIMARY KEY (id_lugar)
+);
+
+CREATE TABLE estados_cancha (
+ id_estado		NUMBER		NOT NULL,
+ nombre_estado		CHAR(1)		NOT NULL,
+ descripcion_estado 	VARCHAR2(40) 		,
+ CONSTRAINT est_pk_ide PRIMARY KEY (id_estado)
+);
+
+CREATE TABLE clientes (
+ id_cliente		NUMBER 				NOT NULL,
+ nombre_cliente 	VARCHAR2(30)			NOT NULL,
+ apellido_cliente 	VARCHAR2(30)			NOT NULL,
+ numero_documento 	VARCHAR2(20) 			NOT NULL,
+ tipo_documento 	CHAR(2) 	DEFAULT'CC' 	NOT NULL,
+ telefono_cliente	VARCHAR2(15)			NOT NULL,
+ CONSTRAINT cli_pk_idc PRIMARY KEY (id_cliente)
+);
+
+CREATE TABLE complejos (
+ id_complejo		NUMBER 		NOT NULL,
+ nombre_complejo 	VARCHAR2(30) 	NOT NULL,
+ telefono_complejo 	VARCHAR2(15) 	NOT NULL,
+ id_lugar 		NUMBER 		NOT NULL,
+ direccion_complejo	VARCHAR2(30) 	NOT NULL,
+ CONSTRAINT com_pk_idc PRIMARY KEY (id_complejo)
+);
+
+CREATE TABLE canchas (
+ id_cancha		NUMBER	NOT NULL,
+ numero_jugadores	NUMBER 	NOT NULL,
+ tipo_cancha 		CHAR(2) NOT NULL,
+ id_complejo		NUMBER 	NOT NULL,
+ id_estado 		NUMBER  NOT NULL,
+ CONSTRAINT can_pk_idc PRIMARY KEY (id_cancha)
+);
+
+CREATE TABLE empleados (
+ id_empleado		NUMBER 				NOT NULL,
+ nombre_empleado 	VARCHAR2(30)			NOT NULL,
+ apellido_empleado 	VARCHAR2(30)			NOT NULL,
+ numero_documento 	VARCHAR2(20) 			NOT NULL,
+ tipo_documento 	CHAR(2) 	DEFAULT'CC'  	NOT NULL,
+ telefono_empleado	VARCHAR2(15)			NOT NULL,
+ tipo_empleado 		CHAR(2)				NOT NULL,
+ id_complejo 		NUMBER 				NOT NULL,
+ id_supervisor 		NUMBER 					,
+ CONSTRAINT emp_pk_ide PRIMARY KEY (id_empleado)
+);
+
+CREATE TABLE alquileres (
+ fecha_inicial	DATE 	NOT NULL, 
+ fecha_final	DATE 	NOT NULL,
+ costo_alquiler	NUMBER	NOT NULL,
+ id_cancha	NUMBER	NOT NULL,
+ id_cliente	NUMBER 	NOT NULL,
+ CONSTRAINT alq_pk_ida PRIMARY KEY (fecha_inicial,id_cancha,id_cliente)
+);
+
+--CREACION DE CONSTRAINTS
+ALTER TABLE lugares ADD(
+ CONSTRAINT lug_fk_idubi FOREIGN KEY (id_ubicacion) REFERENCES lugares (id_lugar),
+ CONSTRAINT lug_ck_tiplug CHECK (tipo_lugar IN('C'/*Ciudad*/, 'B'/*Barrio*/))
+);
+
+ALTER TABLE estados_cancha ADD(
+ CONSTRAINT estcan_ck_nomest CHECK (nombre_estado IN ('B'/*Bueno*/, 'R'/*Regular*/, 'M'/*Malo*/))
+);
+
+ALTER TABLE clientes ADD(
+ CONSTRAINT cli_ck_tipdoc CHECK (tipo_documento IN('TI'/*TarjetaIdentidad*/,'CC'/*CedulaCiudadania*/)),
+ CONSTRAINT cli_uq_numdoc UNIQUE (numero_documento),
+ CONSTRAINT cli_uq_tel UNIQUE (telefono_cliente)
+);
+
+ALTER TABLE complejos ADD(
+ CONSTRAINT com_fk_idlug FOREIGN KEY (id_lugar) REFERENCES lugares (id_lugar),
+ CONSTRAINT com_uq_tel UNIQUE (telefono_complejo)
+);
+
+ALTER TABLE canchas ADD(
+ CONSTRAINT can_fk_idcom FOREIGN KEY(id_complejo) REFERENCES complejos(id_complejo), 
+ CONSTRAINT can_fk_idest FOREIGN KEY(id_estado) REFERENCES estados_cancha(id_estado),
+ CONSTRAINT can_ck_tipcan CHECK (tipo_cancha IN('FT'/*Futbol*/, 'MF'/*MicroFutbol*/,'SF' /*FutbolSala*/, 'TJ' /*Tejo*/, 'TN'/*Tenis*/))
+);
+
+ALTER TABLE empleados ADD(
+ CONSTRAINT emp_fk_idsup FOREIGN KEY (id_supervisor) REFERENCES empleados (id_empleado),
+ CONSTRAINT emp_fk_idcom FOREIGN KEY (id_complejo) REFERENCES complejos (id_complejo),
+ CONSTRAINT emp_ck_tipdoc CHECK (tipo_documento IN ('TI'/*TarjetaIdentidad*/,'CC'/*CedulaCiudadania*/)),
+ CONSTRAINT emp_ck_tipemp CHECK (tipo_empleado IN ('AD'/*Administrativo*/, 'AT'/*AtencionCliente*/,'MG'/*Mantenimiento*/)),
+ CONSTRAINT emp_uq_numdoc UNIQUE (numero_documento),
+ CONSTRAINT emp_uq_tel UNIQUE (telefono_empleado)
+);
+
+ALTER TABLE alquileres ADD(
+ CONSTRAINT alq_fk_idcan FOREIGN KEY(id_cancha) REFERENCES canchas(id_cancha), 
+ CONSTRAINT alq_fk_idcli FOREIGN KEY(id_cliente) REFERENCES clientes(id_cliente)
+);
+
+--Inserciones
+INSERT INTO LUGARES VALUES(1,'Tunja','C',null);
+INSERT INTO LUGARES VALUES(2,'Samaca','C',null);
+INSERT INTO LUGARES VALUES(3,'Duitama','C',null);
+INSERT INTO LUGARES VALUES(4,'Sogamoso','C',null);
+INSERT INTO LUGARES VALUES(5,'Paipa','C',null);
+INSERT INTO LUGARES VALUES(6,'Cucaita','C',null);
+INSERT INTO LUGARES VALUES(7,'Motavita','C',null);
+INSERT INTO LUGARES VALUES(8,'Chiquinquira','C',null);
+INSERT INTO LUGARES VALUES(9,'Villa de Leiva','C',null);
+INSERT INTO LUGARES VALUES(10,'Ventaquemada','C',null);
+INSERT INTO LUGARES VALUES(11,'Combita','C',null);
+INSERT INTO LUGARES VALUES(12,'Chiquiza','C',null);
+INSERT INTO LUGARES VALUES(13,'Chivata','C',null);
+INSERT INTO LUGARES VALUES(14,'Sora','C',null);
+INSERT INTO LUGARES VALUES(15,'Sotaquira','C',null);
+INSERT INTO LUGARES VALUES(16,'Chiscas','C',null);
+INSERT INTO LUGARES VALUES(17,'Guacamayas','C',null);
+INSERT INTO LUGARES VALUES(18,'Guican','C',null);
+INSERT INTO LUGARES VALUES(19,'Panqueba','C',null);
+INSERT INTO LUGARES VALUES(20,'Pajarito','C',null);
+INSERT INTO LUGARES VALUES(21,'Pisba','C',null);
+INSERT INTO LUGARES VALUES(22,'Paya','C',null);
+INSERT INTO LUGARES VALUES(23,'Berbeo','C',null);
+INSERT INTO LUGARES VALUES(24,'Miraflores','C',null);
+INSERT INTO LUGARES VALUES(25,'Paez','C',null);
+INSERT INTO LUGARES VALUES(26,'San Eduardo','C',null);
+INSERT INTO LUGARES VALUES(27,'Cienega','C',null);
+INSERT INTO LUGARES VALUES(28,'Boyaca','C',null);
+INSERT INTO LUGARES VALUES(29,'Jenesano','C',null);
+INSERT INTO LUGARES VALUES(30,'Nuevo Colon','C',null);
+INSERT INTO LUGARES VALUES(31,'Ramiriqui','C',null);
+INSERT INTO LUGARES VALUES(32,'Tibana','C',null);
+INSERT INTO LUGARES VALUES(33,'Turmeque','C',null);
+INSERT INTO LUGARES VALUES(34,'Umbita','C',null);
+INSERT INTO LUGARES VALUES(35,'Viracacha','C',null);
+INSERT INTO LUGARES VALUES(36,'Chinavita','C',null);
+INSERT INTO LUGARES VALUES(37,'Garagoa','C',null);
+INSERT INTO LUGARES VALUES(38,'Puerto Boyaca','C',null);
+INSERT INTO LUGARES VALUES(39,'Macanal','C',null);
+INSERT INTO LUGARES VALUES(40,'Pachavita','C',null);
+INSERT INTO LUGARES VALUES(41,'Boavita','C',null);
+INSERT INTO LUGARES VALUES(42,'La Uvita','C',null);
+INSERT INTO LUGARES VALUES(43,'San Mateo','C',null);
+INSERT INTO LUGARES VALUES(44,'Susacon','C',null);
+INSERT INTO LUGARES VALUES(45,'Tipacoque','C',null);
+INSERT INTO LUGARES VALUES(46,'Brice o','C',null);
+INSERT INTO LUGARES VALUES(47,'Buenavista','C',null);
+INSERT INTO LUGARES VALUES(48,'Caldas','C',null);
+INSERT INTO LUGARES VALUES(49,'Saboya','C',null);
+INSERT INTO LUGARES VALUES(50,'Coper','C',null);
+
+INSERT INTO LUGARES VALUES(200,	'Los Patriotas'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(201,	'Cooservicios'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(202,	'San Antonio'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(203,	'Salamanca'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(204,	'Ruchical'	,	'B'	,	2	);
+INSERT INTO LUGARES VALUES(205,	'Fabrica'	,	'B'	,	2	);
+INSERT INTO LUGARES VALUES(206,	'Soatama'	,	'B'	,	2	);
+INSERT INTO LUGARES VALUES(207,	'Americas'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(208,	'Las Nieves'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(209,	'Dorado'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(210,	'La maria'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(211,	'La Victoria'	,	'B'	,	2	);
+INSERT INTO LUGARES VALUES(212,	'Los Heroes'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(213,	'Asis'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(214,	'Fuente Higueras'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(215,	'La Villita'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(216,	'Rosales'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(217,	'Cristales'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(218,	'Mesopotamia'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(219,	'Centro'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(220,	'Popular'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(221,	'La Florida'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(222,	'San Francisco'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(223,	'La Capilla'	,	'B'	,	9	);
+INSERT INTO LUGARES VALUES(224,	'Arboleda'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(225,	'Esmeralda'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(226,	'El Consuelo'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(227,	'Villa Universitaria'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(228,	'La Fuente'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(229,	'Altamira'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(230,	'Tinjaca'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(231,	'Cuitiva'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(232,	'Iza'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(233,	'Mongua'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(234,	'Pesca'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(235,	'Topaga'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(236,	'Tota'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(237,	'Belen'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(238,	'Cerinza'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(239,	'Corrales'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(240,	'Busbanza'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(241,	'Paraiso'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(242,	'Suarez'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(243,	'Bosque'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(244,	'Floresta'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(245,	'Jerico'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(246,	'Tasco'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(247,	'Socha'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(248,	'Cubara'	,	'B'	,	1	);
+INSERT INTO LUGARES VALUES(249,	'Socota'	,	'B'	,	1	);
+
+INSERT INTO estados_cancha VALUES (1,'R','arcos en mal estado fut');
+INSERT INTO estados_cancha VALUES (2,'R','mala demarcacion fut');
+INSERT INTO estados_cancha VALUES (3,'R','malla en mal estado fut');
+INSERT INTO estados_cancha VALUES (4,'R','balones mal estado fut');
+INSERT INTO estados_cancha VALUES (5,'R','medidas no estandar fut');
+INSERT INTO estados_cancha VALUES (6,'R','Grama mal estado fut');
+INSERT INTO estados_cancha VALUES (7,'R','mal cerramiento fut');
+INSERT INTO estados_cancha VALUES (8,'R','humedad en la cancha fut');
+INSERT INTO estados_cancha VALUES (9,'R','techo en mal estado fut');
+INSERT INTO estados_cancha VALUES (10,'R','balones N  5 fut');
+INSERT INTO estados_cancha VALUES (11,'R','arcos en mal estado micro');
+INSERT INTO estados_cancha VALUES (12,'R','mala demarcacion micro');
+INSERT INTO estados_cancha VALUES (13,'R','malla en mal estado micro');
+INSERT INTO estados_cancha VALUES (14,'R','balones mal estado micro');
+INSERT INTO estados_cancha VALUES (15,'R','medidas no estandar micro');
+INSERT INTO estados_cancha VALUES (16,'R','asfalto mal estado micro');
+INSERT INTO estados_cancha VALUES (17,'R','mal cerramiento micro');
+INSERT INTO estados_cancha VALUES (18,'R','humedad en la cancha micro');
+INSERT INTO estados_cancha VALUES (19,'R','techo en mal estado micro');
+INSERT INTO estados_cancha VALUES (20,'R','balones N  5 micro');
+INSERT INTO estados_cancha VALUES (21,'R','arcos en mal estado fsal');
+INSERT INTO estados_cancha VALUES (22,'R','mala demarcacion fsal');
+INSERT INTO estados_cancha VALUES (23,'R','malla en mal estado fsal');
+INSERT INTO estados_cancha VALUES (24,'R','balones mal estado fsal');
+INSERT INTO estados_cancha VALUES (25,'R','medidas no estandar fsal');
+INSERT INTO estados_cancha VALUES (26,'R','piso mal estado fsal');
+INSERT INTO estados_cancha VALUES (27,'R','mal cerramiento fsal');
+INSERT INTO estados_cancha VALUES (28,'R','humedad en la cancha fsal');
+INSERT INTO estados_cancha VALUES (29,'R','techo en mal estado fsal');
+INSERT INTO estados_cancha VALUES (30,'R','balones N  5 fsal');
+INSERT INTO estados_cancha VALUES (31,'R','Canchas en mal estado tejo');
+INSERT INTO estados_cancha VALUES (32,'R','medidas no estandar tejo');
+INSERT INTO estados_cancha VALUES (33,'R','faltan tejos tejo');
+INSERT INTO estados_cancha VALUES (34,'R','pocas mechas tejo');
+INSERT INTO estados_cancha VALUES (35,'R','plastilina mal estado tejo');
+INSERT INTO estados_cancha VALUES (36,'R','arcilla mal estado tejo');
+INSERT INTO estados_cancha VALUES (37,'R','solo una cancha tejo');
+INSERT INTO estados_cancha VALUES (38,'R','techo en mal estado tejo');
+INSERT INTO estados_cancha VALUES (39,'R','bocin mal estado tejo');
+INSERT INTO estados_cancha VALUES (40,'R','no esta marcada tejo');
+INSERT INTO estados_cancha VALUES (41,'R','malla mal estado tenis');
+INSERT INTO estados_cancha VALUES (42,'R','mala demarcacion tenis');
+INSERT INTO estados_cancha VALUES (43,'R','medidas no estandar tenis');
+INSERT INTO estados_cancha VALUES (44,'R','faltan pelotas tenis');
+INSERT INTO estados_cancha VALUES (45,'R','raquetas mal estado tenis');
+INSERT INTO estados_cancha VALUES (46,'R','pasto en mal estado tenis');
+INSERT INTO estados_cancha VALUES (47,'R','arena en mal estado tenis');
+INSERT INTO estados_cancha VALUES (48,'R','no esta marcada tenis');
+INSERT INTO estados_cancha VALUES (49,'R','solo una raqueta tenis');
+INSERT INTO estados_cancha VALUES (50,'R','no se presta juez tenis');
+INSERT INTO estados_cancha VALUES (51,'B',null);
+INSERT INTO estados_cancha VALUES (52,'R',null);
+INSERT INTO estados_cancha VALUES (53,'M',null);
+
+insert into CLIENTES values (1,'ANDRES','TORRES','1000','CC','7000000');
+insert into CLIENTES values (2,'JUAN','CALDERA','1001','TI','7000001');
+insert into CLIENTES values (3,'SANDRA','OSPINA','1002','CC','7000002');
+insert into CLIENTES values (4,'MARIANA','OBANDO','1003','TI','7000003');
+insert into CLIENTES values (5,'VICENTE','FERNANDEZ','1004','TI','7000004');
+insert into CLIENTES values (6,'BOB','MARLEY','1005','CC','7000005');
+insert into CLIENTES values (7,'SANTIAGO','TAMBO','1006','TI','7000006');
+insert into CLIENTES values (8,'JINNETH','TORRELLI','1007','TI','700007');
+insert into CLIENTES values (9,'WILSON','NEIRA','1008','CC','7000008');
+insert into CLIENTES values (10,'DANIEL','HERRERA','1009','CC','7000009');
+insert into CLIENTES values (11,'JAVIER','MOLINA','1010','CC','7000010');
+insert into CLIENTES values (12,'LILLIAN','GOMEZ','1011','TI','7000011');
+insert into CLIENTES values (13,'SIXTO','NARANJO','1012','CC','7000012');
+insert into CLIENTES values (14,'GERARDO','DUQUE','1013','TI','7000013');
+insert into CLIENTES values (15,'JHONY','SAENZ','1014','TI','7000014');
+insert into CLIENTES values (16,'GERMAN','LOTERO','1015','CC','7000015');
+insert into CLIENTES values (17,'OSCAR','MURILLO','1016','TI','7000016');
+insert into CLIENTES values (18,'AUGUSTO','GIL','1017','TI','700017');
+insert into CLIENTES values (19,'CESAR','PALACIOS','1018','CC','7000018');
+insert into CLIENTES values (20,'GLORIA','ALZATE','1019','CC','7000019');
+insert into CLIENTES values (21,'HECTOR','GONZALES','1020','CC','7000020');
+insert into CLIENTES values (22,'BEATRIZ','OSORIO','1021','TI','7000021');
+insert into CLIENTES values (23,'HERMAN','CORREA','1022','CC','7000022');
+insert into CLIENTES values (24,'CARLOS','MONTOYA','1023','TI','7000023');
+insert into CLIENTES values (25,'CARLOS','GIRALDO','1024','TI','7000024');
+insert into CLIENTES values (26,'ARTURO','TABARES','1025','CC','7000025');
+insert into CLIENTES values (27,'WILLIAM','RAMIREZ','1026','TI','7000026');
+insert into CLIENTES values (28,'JAIME','LOPEZ','1027','TI','700027');
+insert into CLIENTES values (29,'WILSON','NEIRA','1028','CC','7000028');
+insert into CLIENTES values (30,'GLORIA','SACLEMENTE','1029','CC','7000029');
+insert into CLIENTES values (31,'CARLOS','VILLEGAS','1030','CC','7000030');
+insert into CLIENTES values (32,'JORGE','URIBE','1031','TI','7000031');
+insert into CLIENTES values (33,'MARIA','LPEZ','1032','CC','7000032');
+insert into CLIENTES values (34,'ALFREDO','TOBON','1033','TI','7000033');
+insert into CLIENTES values (35,'HECTOR','MOSQUERA','1034','TI','7000034');
+insert into CLIENTES values (36,'ALVARO','BERDUGO','1035','CC','7000035');
+insert into CLIENTES values (37,'CARLOS','ZARATE','1036','TI','7000036');
+insert into CLIENTES values (38,'HERNAN','HURTADO','1037','TI','700037');
+insert into CLIENTES values (39,'JORGE','RUIZ','1038','CC','7000038');
+insert into CLIENTES values (40,'JOHN','DUQUE','1039','CC','7000039');
+insert into CLIENTES values (41,'ARMID','MU OZ','1040','CC','7000040');
+insert into CLIENTES values (42,'ELKIN','DIAZ','1041','TI','7000041');
+insert into CLIENTES values (43,'JULIO','RODAS','1042','CC','7000042');
+insert into CLIENTES values (44,'GABRIEL','JIMENEZ','1043','TI','7000043');
+insert into CLIENTES values (45,'JOSE','ZAPATA','1044','TI','7000044');
+insert into CLIENTES values (46,'BERNARDO','POSADA','1045','CC','7000045');
+insert into CLIENTES values (47,'LUIS','VELEZ','1046','TI','7000046');
+insert into CLIENTES values (48,'HORACIO','MORENO','1047','TI','700047');
+insert into CLIENTES values (49,'ALEJANDRO','ALZATE','1048','CC','7000048');
+insert into CLIENTES values (50,'JAVIER','AGUILAR','1049','CC','7000049');
+
+INSERT INTO COMPLEJOS VALUES(1	,	'complejo_1'	,	'7478521'	,	200	,	 'Cra 12 No. 83-75');
+INSERT INTO COMPLEJOS VALUES(2	,	'complejo_2'	,	'7478542'	,	201	,	'Calle 4A No. 8-75');
+INSERT INTO COMPLEJOS VALUES(3	,	'complejo_3'	,	'7478523'	,	202	,	'Cra 6 No. 8-5');
+INSERT INTO COMPLEJOS VALUES(4	,	'complejo_4'	,	'7471524'	,	203	,	'Calle 6 No. 8-5');
+INSERT INTO COMPLEJOS VALUES(5	,	'complejo_5'	,	'7471525'	,	204	,	'Calle 1 No. 83-75');
+INSERT INTO COMPLEJOS VALUES(6	,	'complejo_6'	,	'7471526'	,	205	,	'Cra 1 No. 83-75');
+INSERT INTO COMPLEJOS VALUES(7	,	'complejo_7'	,	'7471527'	,	206	,	'Calle 2 No. 8-5');
+INSERT INTO COMPLEJOS VALUES(8	,	'complejo_8'	,	'7471528'	,	207	,	'Calle 1 No. 3-15');
+INSERT INTO COMPLEJOS VALUES(9	,	'complejo_9'	,	'7471529'	,	208	,	'Calle 1 No. 3-25');
+INSERT INTO COMPLEJOS VALUES(10	,	'complejo_10'	,	'7471520'	,	209	,	'Calle 1 No. 3-35');
+INSERT INTO COMPLEJOS VALUES(11	,	'complejo_11'	,	'7478621'	,	210	,	'Calle 5 No. 12-8');
+INSERT INTO COMPLEJOS VALUES(12	,	'complejo_12'	,	'7478622'	,	211	,	'Calle 45 No 11-2');
+INSERT INTO COMPLEJOS VALUES(13	,	'complejo_13'	,	'7478623'	,	212	,	'Cra 12 No 12-35');
+INSERT INTO COMPLEJOS VALUES(14	,	'complejo_14'	,	'7478624'	,	213	,	'Calle 2 No 12-23');
+INSERT INTO COMPLEJOS VALUES(15	,	'complejo_15'	,	'7478625'	,	214	,	'Cra 1 No 1-1');
+INSERT INTO COMPLEJOS VALUES(16	,	'complejo_16'	,	'7478626'	,	215	,	'Cra 22 No 9-11');
+INSERT INTO COMPLEJOS VALUES(17	,	'complejo_17'	,	'7478627'	,	216	,	'Cra 6 No 14-2');
+INSERT INTO COMPLEJOS VALUES(18	,	'complejo_18'	,	'7478628'	,	217	,	'Cra 5 No 12-11');
+INSERT INTO COMPLEJOS VALUES(19	,	'complejo_19'	,	'7478629'	,	218	,	'calle 5 No 12-11');
+INSERT INTO COMPLEJOS VALUES(20	,	'complejo_20'	,	'7478630'	,	219	,	'Cra 11 No 25-7');
+INSERT INTO COMPLEJOS VALUES(21	,	'complejo_21'	,	'7478631'	,	220	,	'Cra 9 No 8-13');
+INSERT INTO COMPLEJOS VALUES(22	,	'complejo_22'	,	'7478632'	,	221	,	'Cra 6 No 22-20');
+INSERT INTO COMPLEJOS VALUES(23	,	'complejo_23'	,	'7478633'	,	222	,	'Cra 6 No 50-11');
+INSERT INTO COMPLEJOS VALUES(24	,	'complejo_24'	,	'7478634'	,	223	,	'Cra 11 No 24-11');
+INSERT INTO COMPLEJOS VALUES(25	,	'complejo_25'	,	'7478635'	,	224	,	'Cra 20 No 13-35');
+INSERT INTO COMPLEJOS VALUES(26	,	'complejo_26'	,	'7478636'	,	225	,	'Cra 12 No 30-20');
+INSERT INTO COMPLEJOS VALUES(27	,	'complejo_27'	,	'7478637'	,	226	,	'Calle 12 No 50-20');
+INSERT INTO COMPLEJOS VALUES(28	,	'complejo_28'	,	'7478638'	,	227	,	'Calle 11 No 12-35');
+INSERT INTO COMPLEJOS VALUES(29	,	'complejo_29'	,	'7478639'	,	228	,	'Calle 15 No 25-32');
+INSERT INTO COMPLEJOS VALUES(30	,	'complejo_30'	,	'7478640'	,	229	,	'Calle 5 No 12-25');
+INSERT INTO COMPLEJOS VALUES(31	,	'complejo_31'	,	'7478641'	,	230	,	'Calle 16 No 23-8');
+INSERT INTO COMPLEJOS VALUES(32	,	'complejo_32'	,	'7478642'	,	231	,	'Calle 18 No 13-9');
+INSERT INTO COMPLEJOS VALUES(33	,	'complejo_33'	,	'7478643'	,	232	,	'Calle 20 No 11-11');
+INSERT INTO COMPLEJOS VALUES(34	,	'complejo_34'	,	'7478644'	,	233	,	'Calle 11 No 26-14');
+INSERT INTO COMPLEJOS VALUES(35	,	'complejo_35'	,	'7478645'	,	234	,	'Cra 11 No 11-11');
+INSERT INTO COMPLEJOS VALUES(36	,	'complejo_36'	,	'7478646'	,	235	,	'Cra 12 No 13-18');
+INSERT INTO COMPLEJOS VALUES(37	,	'complejo_37'	,	'7478647'	,	236	,	'Cra 11 No 11-11');
+INSERT INTO COMPLEJOS VALUES(38	,	'complejo_38'	,	'7478648'	,	237	,	'Cra 12 No 12-12');
+INSERT INTO COMPLEJOS VALUES(39	,	'complejo_39'	,	'7478649'	,	238	,	'Cra 13 No 36-19');
+INSERT INTO COMPLEJOS VALUES(40	,	'complejo_40'	,	'7478650'	,	239	,	'Cra 4 No 14-45');
+INSERT INTO COMPLEJOS VALUES(41	,	'complejo_41'	,	'7478651'	,	240	,	'Cra 3 No 5-5');
+INSERT INTO COMPLEJOS VALUES(42	,	'complejo_42'	,	'7478652'	,	241	,	'Cra 11 No 33-12');
+INSERT INTO COMPLEJOS VALUES(43	,	'complejo_43'	,	'7478653'	,	242	,	'Calle 14 No 9-11');
+INSERT INTO COMPLEJOS VALUES(44	,	'complejo_44'	,	'7478654'	,	243	,	'Cra 11 No 13-2');
+INSERT INTO COMPLEJOS VALUES(45	,	'complejo_45'	,	'7478655'	,	244	,	'Cra 12 No 18-42');
+INSERT INTO COMPLEJOS VALUES(46	,	'complejo_46'	,	'7478656'	,	245	,	'Calle 11 No 12-23');
+INSERT INTO COMPLEJOS VALUES(47	,	'complejo_47'	,	'7478657'	,	246	,	'Calle 8 No 12-45');
+INSERT INTO COMPLEJOS VALUES(48	,	'complejo_48'	,	'7478658'	,	247	,	'Cra 20 No 9-25');
+INSERT INTO COMPLEJOS VALUES(49	,	'complejo_49'	,	'7478659'	,	248	,	'Cra 25 No 11-34');
+INSERT INTO COMPLEJOS VALUES(50	,	'complejo_50'	,	'7478660'	,	249	,	'Cra 1 No 1-1');
+
+INSERT	INTO	empleados	VALUES	(1	,	'OSCAR'	,	'SUAREZ'	,	'1101'	,	'CC'	,	'1234'	,	'MG'	,	1	,	NULL);
+INSERT	INTO	empleados	VALUES	(2	,	'YESID'	,	'SAENZ'	,	'1102'	,	'CC'	,	'1235'	,	'MG'	,	1	,	1);
+INSERT	INTO	empleados	VALUES	(3	,	'PLINIO'	,	'GRIJALBA'	,	'1103'	,	'CC'	,	'1236'	,	'MG'	,	1	,	1);
+INSERT	INTO	empleados	VALUES	(4	,	'RICARDO'	,	'SUAREZ'	,	'1104'	,	'CC'	,	'1237'	,	'MG'	,	1	,	1);
+INSERT	INTO	empleados	VALUES	(5	,	'PEDRO'	,	'PEREZ'	,	'1105'	,	'CC'	,	'1238'	,	'MG'	,	1	,	1);
+INSERT	INTO	empleados	VALUES	(6	,	'ANAPITO'	,	'SILVIO'	,	'1106'	,	'CC'	,	'1231'	,	'AD'	,	1	,	1);
+INSERT	INTO	empleados	VALUES	(7	,	'CHENTE'	,	'NINIO'	,	'1107'	,	'CC'	,	'1232'	,	'AT'	,	1	,	1);
+INSERT	INTO	empleados	VALUES	(8	,	'SEBASTIAN'	,	'FORERO'	,	'1108'	,	'CC'	,	'1233'	,	'AT'	,	1	,	1);
+INSERT	INTO	empleados	VALUES	(9	,	'WILFRIDO'	,	'VARGAS'	,	'1109'	,	'CC'	,	'12345'	,	'AT'	,	1	,	1);
+INSERT	INTO	empleados	VALUES	(10	,	'HELVER'	,	'GALAN'	,	'1110'	,	'CC'	,	'12376'	,	'AT'	,	1	,	1);
+INSERT	INTO	empleados	VALUES	(11	,	'MARIA'	,	'MIRANDA'	,	'1111'	,	'CC'	,	'123401'	,	'MG'	,	2	,	NULL);
+INSERT	INTO	empleados	VALUES	(12	,	'FRANSISCO'	,	'SANDON'	,	'1112'	,	'CC'	,	'123502'	,	'MG'	,	2	,	11);
+INSERT	INTO	empleados	VALUES	(13	,	'RUBY'	,	'MAZA'	,	'1113'	,	'CC'	,	'123603'	,	'MG'	,	2	,	11);
+INSERT	INTO	empleados	VALUES	(14	,	'ARELIS'	,	'URIBE'	,	'1114'	,	'CC'	,	'123704'	,	'MG'	,	2	,	11);
+INSERT	INTO	empleados	VALUES	(15	,	'ADOLFO'	,	'HERA'	,	'1115'	,	'CC'	,	'123805'	,	'MG'	,	2	,	11);
+INSERT	INTO	empleados	VALUES	(16	,	'WILMER'	,	'GOMEZ'	,	'1116'	,	'CC'	,	'123106'	,	'AD'	,	2	,	11);
+INSERT	INTO	empleados	VALUES	(17	,	'KELLY'	,	'NARVAEZ'	,	'1117'	,	'CC'	,	'123207'	,	'AT'	,	2	,	11);
+INSERT	INTO	empleados	VALUES	(18	,	'AURA'	,	'DIAZ'	,	'1118'	,	'CC'	,	'123308'	,	'AT'	,	2	,	11);
+INSERT	INTO	empleados	VALUES	(19	,	'ISABEL'	,	'CARDALES'	,	'1119'	,	'CC'	,	'134509'	,	'AT'	,	3	,	null);
+INSERT	INTO	empleados	VALUES	(20	,	'LUIS'	,	'PEREZ'	,	'1121'	,	'CC'	,	'1237610'	,	'AT'	,	4	,	null);
+INSERT	INTO	empleados	VALUES	(21	,	'JOSE'	,	'PALACIO'	,	'1122'	,	'CC'	,	'1237611'	,	'AT'	,	5	,	null);
+INSERT	INTO	empleados	VALUES	(22	,	'ANA'	,	'CUABAS'	,	'1123'	,	'CC'	,	'1237612'	,	'AT'	,	6	,	null);
+INSERT	INTO	empleados	VALUES	(23	,	'NORIS'	,	'HERRERA'	,	'1124'	,	'CC'	,	'1237613'	,	'AT'	,	7	,	null);
+INSERT	INTO	empleados	VALUES	(24	,	'JOHN'	,	'MERCADO'	,	'1125'	,	'CC'	,	'1237614'	,	'AT'	,	8	,	null);
+INSERT	INTO	empleados	VALUES	(25	,	'MARIA'	,	'RODRIGUEZ'	,	'1126'	,	'CC'	,	'1237615'	,	'AT'	,	9	,	null);
+INSERT	INTO	empleados	VALUES	(26	,	'JOVITA'	,	'ROENES'	,	'1127'	,	'CC'	,	'1237616'	,	'AT'	,	10	,	null);
+INSERT	INTO	empleados	VALUES	(27	,	'JOSEP'	,	'RAMOS'	,	'1128'	,	'CC'	,	'1237617'	,	'AT'	,	11	,	null);
+INSERT	INTO	empleados	VALUES	(28	,	'JOSE'	,	'CASTILLO'	,	'1129'	,	'CC'	,	'1237618'	,	'AT'	,	12	,	null);
+INSERT	INTO	empleados	VALUES	(29	,	'CARMEN'	,	'CASTRO'	,	'1131'	,	'CC'	,	'1237619'	,	'AT'	,	13	,	null);
+INSERT	INTO	empleados	VALUES	(30	,	'SAMUEL'	,	'MANYOMA'	,	'1132'	,	'CC'	,	'1237620'	,	'AT'	,	14	,	null);
+INSERT	INTO	empleados	VALUES	(31	,	'JUAN'	,	'AMALIA'	,	'1133'	,	'CC'	,	'1237621'	,	'AT'	,	15	,	null);
+INSERT	INTO	empleados	VALUES	(32	,	'CATALINA'	,	'CABALLERO'	,	'1134'	,	'CC'	,	'1237622'	,	'AT'	,	16	,	null);
+INSERT	INTO	empleados	VALUES	(33	,	'MARIO'	,	'MEDINA'	,	'1135'	,	'CC'	,	'1237623'	,	'AT'	,	17	,	null);
+INSERT	INTO	empleados	VALUES	(34	,	'RAFAEL'	,	'ROCHA'	,	'1136'	,	'CC'	,	'1237624'	,	'AT'	,	18	,	null);
+INSERT	INTO	empleados	VALUES	(35	,	'ORLANDO'	,	'SERNA'	,	'1137'	,	'CC'	,	'1237625'	,	'AT'	,	19	,	null);
+INSERT	INTO	empleados	VALUES	(36	,	'HERMELINA'	,	'RINCON'	,	'1138'	,	'CC'	,	'1237626'	,	'AT'	,	20	,	null);
+INSERT	INTO	empleados	VALUES	(37	,	'MANUEL'	,	'SANTOS'	,	'1139'	,	'CC'	,	'1237627'	,	'AT'	,	21	,	null);
+INSERT	INTO	empleados	VALUES	(38	,	'DANIELA'	,	'MENDIVIL'	,	'1140'	,	'CC'	,	'1237628'	,	'AT'	,	22	,	null);
+INSERT	INTO	empleados	VALUES	(39	,	'GERALDINE'	,	'MARMOL'	,	'1141'	,	'CC'	,	'1237629'	,	'AT'	,	23	,	null);
+INSERT	INTO	empleados	VALUES	(40	,	'JOSE'	,	'GUTIEREZ'	,	'1142'	,	'CC'	,	'1237630'	,	'AT'	,	24	,	null);
+INSERT	INTO	empleados	VALUES	(41	,	'EFREN'	,	'PARRA'	,	'1143'	,	'CC'	,	'1237631'	,	'AT'	,	25	,	null);
+INSERT	INTO	empleados	VALUES	(42	,	'FRANCISCO'	,	'GUERRA'	,	'1144'	,	'CC'	,	'1237632'	,	'AT'	,	26	,	null);
+INSERT	INTO	empleados	VALUES	(43	,	'ANA'	,	'MOLINA'	,	'1145'	,	'CC'	,	'1237633'	,	'AT'	,	27	,	null);
+INSERT	INTO	empleados	VALUES	(44	,	'RAQUEL'	,	'SANCHEZ'	,	'1146'	,	'CC'	,	'1237634'	,	'AT'	,	28	,	null);
+INSERT	INTO	empleados	VALUES	(45	,	'MARCIANO'	,	'PALOMINO'	,	'1147'	,	'CC'	,	'1237635'	,	'AT'	,	29	,	null);
+INSERT	INTO	empleados	VALUES	(46	,	'FLOR'	,	'OCHOA'	,	'1148'	,	'CC'	,	'1237636'	,	'AT'	,	30	,	null);
+INSERT	INTO	empleados	VALUES	(47	,	'DUARTE'	,	'OLIVAREZ'	,	'1149'	,	'CC'	,	'1237637'	,	'AT'	,	31	,	null);
+INSERT	INTO	empleados	VALUES	(48	,	'ASTERIO'	,	'OSPINA'	,	'1150'	,	'CC'	,	'1237638'	,	'AT'	,	32	,	null);
+INSERT	INTO	empleados	VALUES	(49	,	'JULIAN'	,	'SALAS'	,	'1151'	,	'CC'	,	'1237639'	,	'AT'	,	33	,	null);
+INSERT	INTO	empleados	VALUES	(50	,	'RAMONA'	,	'VASQUEZ'	,	'1152'	,	'CC'	,	'1237640'	,	'AT'	,	34	,	null);
+INSERT	INTO	empleados	VALUES	(51	,	'EMILSON'	,	'ALFARO'	,	'1153'	,	'CC'	,	'1237641'	,	'AT'	,	35	,	null);
+INSERT	INTO	empleados	VALUES	(52	,	'ANDERSON'	,	'DURAN'	,	'1154'	,	'CC'	,	'1237643'	,	'AT'	,	36	,	null);
+INSERT	INTO	empleados	VALUES	(53	,	'GREGORIA'	,	'POLO'	,	'1155'	,	'CC'	,	'1237644'	,	'AT'	,	37	,	null);
+INSERT	INTO	empleados	VALUES	(54	,	'YANETH'	,	'MENDOZA'	,	'1156'	,	'CC'	,	'1237645'	,	'AT'	,	38	,	null);
+INSERT	INTO	empleados	VALUES	(55	,	'PATRICIA'	,	'CERVANTES'	,	'1157'	,	'CC'	,	'1237646'	,	'AT'	,	39	,	null);
+INSERT	INTO	empleados	VALUES	(56	,	'ELIECER'	,	'ANILLO'	,	'1158'	,	'CC'	,	'1237647'	,	'AT'	,	40	,	null);
+INSERT	INTO	empleados	VALUES	(57	,	'EUSEBIO'	,	'GARIZABAL'	,	'1159'	,	'CC'	,	'1237648'	,	'AT'	,	41	,	null);
+INSERT	INTO	empleados	VALUES	(58	,	'JOAQUIN'	,	'PUELLO'	,	'1160'	,	'CC'	,	'1237649'	,	'AT'	,	42	,	null);
+INSERT	INTO	empleados	VALUES	(59	,	'BLEINER'	,	'VILLA'	,	'1161'	,	'CC'	,	'1237650'	,	'AT'	,	43	,	null);
+INSERT	INTO	empleados	VALUES	(60	,	'EDWIN'	,	'LORA'	,	'1163'	,	'CC'	,	'1237651'	,	'AT'	,	44	,	null);
+INSERT	INTO	empleados	VALUES	(61	,	'KEINER'	,	'LARA'	,	'1164'	,	'CC'	,	'1237652'	,	'AT'	,	45	,	null);
+INSERT	INTO	empleados	VALUES	(62	,	'DORIDA'	,	'MADERA'	,	'1165'	,	'CC'	,	'1237653'	,	'AT'	,	46	,	null);
+INSERT	INTO	empleados	VALUES	(63	,	'LIGIA'	,	'CASTILLO'	,	'1167'	,	'CC'	,	'1237654'	,	'AT'	,	47	,	null);
+INSERT	INTO	empleados	VALUES	(64	,	'RAFAEL'	,	'HIDALGO'	,	'1166'	,	'CC'	,	'1237655'	,	'AT'	,	48	,	null);
+INSERT	INTO	empleados	VALUES	(65	,	'LEIDIS'	,	'CASTRILLON'	,	'1168'	,	'CC'	,	'1237656'	,	'AT'	,	49	,	null);
+INSERT	INTO	empleados	VALUES	(66	,	'JESUS'	,	'REYES'	,	'1169'	,	'CC'	,	'1237657'	,	'AT'	,	50	,	null);
+
+INSERT INTO canchas VALUES (1,22,'FT',1,2);
+INSERT INTO canchas VALUES (2,22,'FT',2,3);
+INSERT INTO canchas VALUES (3,22,'FT',3,4);
+INSERT INTO canchas VALUES (4,22,'FT',4,5);
+INSERT INTO canchas VALUES (5,22,'FT',5,6);
+INSERT INTO canchas VALUES (6,22,'FT',6,7);
+INSERT INTO canchas VALUES (7,22,'FT',7,1);
+INSERT INTO canchas VALUES (8,22,'FT',8,8);
+INSERT INTO canchas VALUES (9,22,'FT',9,9);
+INSERT INTO canchas VALUES (10,22,'FT',10,10);
+INSERT INTO canchas VALUES (11,10,'MF',11,11);
+INSERT INTO canchas VALUES (12,10,'MF',12,12);
+INSERT INTO canchas VALUES (13,10,'MF',13,13);
+INSERT INTO canchas VALUES (14,10,'MF',14,14);
+INSERT INTO canchas VALUES (15,10,'MF',15,15);
+INSERT INTO canchas VALUES (16,10,'MF',16,16);
+INSERT INTO canchas VALUES (17,10,'MF',17,17);
+INSERT INTO canchas VALUES (18,10,'MF',18,18);
+INSERT INTO canchas VALUES (19,10,'MF',19,19);
+INSERT INTO canchas VALUES (20,10,'MF',20,20);
+INSERT INTO canchas VALUES (21,10,'FT',21,1);
+INSERT INTO canchas VALUES (22,10,'FT',22,2);
+INSERT INTO canchas VALUES (23,10,'FT',23,3);
+INSERT INTO canchas VALUES (24,10,'FT',24,4);
+INSERT INTO canchas VALUES (25,10,'FT',25,5);
+INSERT INTO canchas VALUES (26,10,'FT',26,6);
+INSERT INTO canchas VALUES (27,10,'FT',27,7);
+INSERT INTO canchas VALUES (28,10,'FT',28,8);
+INSERT INTO canchas VALUES (29,10,'FT',29,9);
+INSERT INTO canchas VALUES (30,10,'FT',30,10);
+INSERT INTO canchas VALUES (31,8,'TJ',31,31);
+INSERT INTO canchas VALUES (32,8,'TJ',32,32);
+INSERT INTO canchas VALUES (33,8,'TJ',33,33);
+INSERT INTO canchas VALUES (34,8,'TJ',34,34);
+INSERT INTO canchas VALUES (35,8,'TJ',35,35);
+INSERT INTO canchas VALUES (36,8,'TJ',36,36);
+INSERT INTO canchas VALUES (37,8,'TJ',37,37);
+INSERT INTO canchas VALUES (38,8,'TJ',38,38);
+INSERT INTO canchas VALUES (39,8,'TJ',39,39);
+INSERT INTO canchas VALUES (40,8,'TJ',40,40);
+INSERT INTO canchas VALUES (41,4,'TN',41,41);
+INSERT INTO canchas VALUES (42,4,'TN',42,42);
+INSERT INTO canchas VALUES (43,4,'TN',43,43);
+INSERT INTO canchas VALUES (44,4,'TN',44,44);
+INSERT INTO canchas VALUES (45,4,'TN',45,45);
+INSERT INTO canchas VALUES (46,4,'TN',46,46);
+INSERT INTO canchas VALUES (47,4,'TN',47,47);
+INSERT INTO canchas VALUES (48,4,'TN',48,48);
+INSERT INTO canchas VALUES (49,4,'TN',49,49);
+INSERT INTO canchas VALUES (50,4,'TN',50,50);
+
+INSERT INTO ALQUILERES VALUES (TO_DATE('01/12/2013', 'DD/MM/YYYY'), TO_DATE('02/12/2013', 'DD/MM/YYYY'), 70000, 1, 1);
+INSERT INTO ALQUILERES VALUES (TO_DATE('02/12/2013', 'DD/MM/YYYY'), TO_DATE('03/12/2013', 'DD/MM/YYYY'), 30000, 2, 2);
+INSERT INTO ALQUILERES VALUES (TO_DATE('03/12/2013', 'DD/MM/YYYY'), TO_DATE('04/12/2013', 'DD/MM/YYYY'), 50000, 3, 3);
+INSERT INTO ALQUILERES VALUES (TO_DATE('04/12/2013', 'DD/MM/YYYY'), TO_DATE('05/12/2013', 'DD/MM/YYYY'), 10000, 4, 4);
+INSERT INTO ALQUILERES VALUES (TO_DATE('05/12/2013', 'DD/MM/YYYY'), TO_DATE('06/12/2013', 'DD/MM/YYYY'), 70000, 5, 5);
+INSERT INTO ALQUILERES VALUES (TO_DATE('06/12/2013', 'DD/MM/YYYY'), TO_DATE('07/12/2013', 'DD/MM/YYYY'), 70000, 6, 6);
+INSERT INTO ALQUILERES VALUES (TO_DATE('07/12/2013', 'DD/MM/YYYY'), TO_DATE('08/12/2013', 'DD/MM/YYYY'), 79000, 7, 7);
+INSERT INTO ALQUILERES VALUES (TO_DATE('08/12/2013', 'DD/MM/YYYY'), TO_DATE('09/12/2013', 'DD/MM/YYYY'), 74000, 8, 8);
+INSERT INTO ALQUILERES VALUES (TO_DATE('09/12/2013', 'DD/MM/YYYY'), TO_DATE('10/12/2013', 'DD/MM/YYYY'), 77000, 9, 9);
+INSERT INTO ALQUILERES VALUES (TO_DATE('10/12/2013', 'DD/MM/YYYY'), TO_DATE('11/12/2013', 'DD/MM/YYYY'), 77000, 10, 10);
+INSERT INTO ALQUILERES VALUES (TO_DATE('11/12/2013', 'DD/MM/YYYY'), TO_DATE('12/12/2013', 'DD/MM/YYYY'), 75000, 11, 11);
+INSERT INTO ALQUILERES VALUES (TO_DATE('12/12/2013', 'DD/MM/YYYY'), TO_DATE('13/12/2013', 'DD/MM/YYYY'), 72000, 12, 12);
+INSERT INTO ALQUILERES VALUES (TO_DATE('13/12/2013', 'DD/MM/YYYY'), TO_DATE('14/12/2013', 'DD/MM/YYYY'), 78000, 13, 13);
+INSERT INTO ALQUILERES VALUES (TO_DATE('14/12/2013', 'DD/MM/YYYY'), TO_DATE('15/12/2013', 'DD/MM/YYYY'), 79000, 14, 14);
+INSERT INTO ALQUILERES VALUES (TO_DATE('15/12/2013', 'DD/MM/YYYY'), TO_DATE('16/12/2013', 'DD/MM/YYYY'), 30000, 15, 15);
+INSERT INTO ALQUILERES VALUES (TO_DATE('16/12/2013', 'DD/MM/YYYY'), TO_DATE('17/12/2013', 'DD/MM/YYYY'), 50000, 16, 16);
+INSERT INTO ALQUILERES VALUES (TO_DATE('17/12/2013', 'DD/MM/YYYY'), TO_DATE('18/12/2013', 'DD/MM/YYYY'), 70000, 17, 17);
+INSERT INTO ALQUILERES VALUES (TO_DATE('18/12/2013', 'DD/MM/YYYY'), TO_DATE('19/12/2013', 'DD/MM/YYYY'), 90000, 18, 18);
+INSERT INTO ALQUILERES VALUES (TO_DATE('19/12/2013', 'DD/MM/YYYY'), TO_DATE('20/12/2013', 'DD/MM/YYYY'), 10000, 19, 19);
+INSERT INTO ALQUILERES VALUES (TO_DATE('20/12/2013', 'DD/MM/YYYY'), TO_DATE('21/12/2013', 'DD/MM/YYYY'), 75000, 20, 20);
+INSERT INTO ALQUILERES VALUES (TO_DATE('21/12/2013', 'DD/MM/YYYY'), TO_DATE('22/12/2013', 'DD/MM/YYYY'), 75000, 21, 21);
+INSERT INTO ALQUILERES VALUES (TO_DATE('22/12/2013', 'DD/MM/YYYY'), TO_DATE('23/12/2013', 'DD/MM/YYYY'), 78000, 22, 22);
+INSERT INTO ALQUILERES VALUES (TO_DATE('23/12/2013', 'DD/MM/YYYY'), TO_DATE('24/12/2013', 'DD/MM/YYYY'), 72000, 23, 23);
+INSERT INTO ALQUILERES VALUES (TO_DATE('24/12/2013', 'DD/MM/YYYY'), TO_DATE('25/12/2013', 'DD/MM/YYYY'), 76000, 24, 24);
+INSERT INTO ALQUILERES VALUES (TO_DATE('25/12/2013', 'DD/MM/YYYY'), TO_DATE('26/12/2013', 'DD/MM/YYYY'), 78000, 25, 25);
+INSERT INTO ALQUILERES VALUES (TO_DATE('26/12/2013', 'DD/MM/YYYY'), TO_DATE('27/12/2013', 'DD/MM/YYYY'), 79000, 26, 26);
+INSERT INTO ALQUILERES VALUES (TO_DATE('27/12/2013', 'DD/MM/YYYY'), TO_DATE('28/12/2013', 'DD/MM/YYYY'), 72000, 27, 27);
+INSERT INTO ALQUILERES VALUES (TO_DATE('28/12/2013', 'DD/MM/YYYY'), TO_DATE('29/12/2013', 'DD/MM/YYYY'), 76000, 28, 28);
+INSERT INTO ALQUILERES VALUES (TO_DATE('29/12/2013', 'DD/MM/YYYY'), TO_DATE('30/12/2013', 'DD/MM/YYYY'), 78000, 29, 29);
+INSERT INTO ALQUILERES VALUES (TO_DATE('30/12/2013', 'DD/MM/YYYY'), TO_DATE('31/12/2013', 'DD/MM/YYYY'), 79000, 30, 30);
+
+INSERT INTO ALQUILERES VALUES (TO_DATE('01/01/2014', 'DD/MM/YYYY'), TO_DATE('02/01/2014', 'DD/MM/YYYY'), 70000, 31, 11);
+INSERT INTO ALQUILERES VALUES (TO_DATE('02/01/2014', 'DD/MM/YYYY'), TO_DATE('03/01/2014', 'DD/MM/YYYY'), 30000, 32, 12);
+INSERT INTO ALQUILERES VALUES (TO_DATE('03/01/2014', 'DD/MM/YYYY'), TO_DATE('04/01/2014', 'DD/MM/YYYY'), 50000, 33, 13);
+INSERT INTO ALQUILERES VALUES (TO_DATE('04/01/2014', 'DD/MM/YYYY'), TO_DATE('05/01/2014', 'DD/MM/YYYY'), 10000, 34, 14);
+INSERT INTO ALQUILERES VALUES (TO_DATE('05/01/2014', 'DD/MM/YYYY'), TO_DATE('06/01/2014', 'DD/MM/YYYY'), 70000, 35, 15);
+INSERT INTO ALQUILERES VALUES (TO_DATE('06/01/2014', 'DD/MM/YYYY'), TO_DATE('07/01/2014', 'DD/MM/YYYY'), 70000, 36, 16);
+INSERT INTO ALQUILERES VALUES (TO_DATE('07/01/2014', 'DD/MM/YYYY'), TO_DATE('08/01/2014', 'DD/MM/YYYY'), 79000, 37, 17);
+INSERT INTO ALQUILERES VALUES (TO_DATE('08/01/2014', 'DD/MM/YYYY'), TO_DATE('09/01/2014', 'DD/MM/YYYY'), 74000, 38, 18);
+INSERT INTO ALQUILERES VALUES (TO_DATE('09/01/2014', 'DD/MM/YYYY'), TO_DATE('10/01/2014', 'DD/MM/YYYY'), 77000, 39, 19);
+INSERT INTO ALQUILERES VALUES (TO_DATE('10/01/2014', 'DD/MM/YYYY'), TO_DATE('11/01/2014', 'DD/MM/YYYY'), 77000, 20, 20);
+INSERT INTO ALQUILERES VALUES (TO_DATE('11/01/2014', 'DD/MM/YYYY'), TO_DATE('12/01/2014', 'DD/MM/YYYY'), 75000, 21, 21);
+INSERT INTO ALQUILERES VALUES (TO_DATE('12/01/2014', 'DD/MM/YYYY'), TO_DATE('13/01/2014', 'DD/MM/YYYY'), 72000, 22, 22);
+INSERT INTO ALQUILERES VALUES (TO_DATE('13/01/2014', 'DD/MM/YYYY'), TO_DATE('14/01/2014', 'DD/MM/YYYY'), 78000, 23, 23);
+INSERT INTO ALQUILERES VALUES (TO_DATE('14/01/2014', 'DD/MM/YYYY'), TO_DATE('15/01/2014', 'DD/MM/YYYY'), 79000, 24, 24);
+INSERT INTO ALQUILERES VALUES (TO_DATE('15/01/2014', 'DD/MM/YYYY'), TO_DATE('16/01/2014', 'DD/MM/YYYY'), 30000, 25, 25);
+INSERT INTO ALQUILERES VALUES (TO_DATE('16/01/2014', 'DD/MM/YYYY'), TO_DATE('17/01/2014', 'DD/MM/YYYY'), 50000, 26, 26);
+INSERT INTO ALQUILERES VALUES (TO_DATE('17/01/2014', 'DD/MM/YYYY'), TO_DATE('18/01/2014', 'DD/MM/YYYY'), 70000, 27, 27);
+INSERT INTO ALQUILERES VALUES (TO_DATE('18/01/2014', 'DD/MM/YYYY'), TO_DATE('19/01/2014', 'DD/MM/YYYY'), 90000, 28, 28);
+INSERT INTO ALQUILERES VALUES (TO_DATE('19/01/2014', 'DD/MM/YYYY'), TO_DATE('20/01/2014', 'DD/MM/YYYY'), 10000, 29, 29);
+INSERT INTO ALQUILERES VALUES (TO_DATE('20/01/2014', 'DD/MM/YYYY'), TO_DATE('21/01/2014', 'DD/MM/YYYY'), 75000, 10, 20);
+INSERT INTO ALQUILERES VALUES (TO_DATE('21/01/2014', 'DD/MM/YYYY'), TO_DATE('22/01/2014', 'DD/MM/YYYY'), 75000, 1, 31);
+INSERT INTO ALQUILERES VALUES (TO_DATE('22/01/2014', 'DD/MM/YYYY'), TO_DATE('23/01/2014', 'DD/MM/YYYY'), 78000, 2, 32);
+INSERT INTO ALQUILERES VALUES (TO_DATE('23/01/2014', 'DD/MM/YYYY'), TO_DATE('24/01/2014', 'DD/MM/YYYY'), 72000, 3, 33);
+INSERT INTO ALQUILERES VALUES (TO_DATE('24/01/2014', 'DD/MM/YYYY'), TO_DATE('25/01/2014', 'DD/MM/YYYY'), 76000, 4, 34);
+INSERT INTO ALQUILERES VALUES (TO_DATE('25/01/2014', 'DD/MM/YYYY'), TO_DATE('26/01/2014', 'DD/MM/YYYY'), 78000, 5, 35);
+INSERT INTO ALQUILERES VALUES (TO_DATE('26/01/2014', 'DD/MM/YYYY'), TO_DATE('27/01/2014', 'DD/MM/YYYY'), 79000, 6, 36);
+INSERT INTO ALQUILERES VALUES (TO_DATE('27/01/2014', 'DD/MM/YYYY'), TO_DATE('28/01/2014', 'DD/MM/YYYY'), 72000, 7, 37);
+INSERT INTO ALQUILERES VALUES (TO_DATE('28/01/2014', 'DD/MM/YYYY'), TO_DATE('29/01/2014', 'DD/MM/YYYY'), 76000, 8, 38);
+INSERT INTO ALQUILERES VALUES (TO_DATE('29/01/2014', 'DD/MM/YYYY'), TO_DATE('30/01/2014', 'DD/MM/YYYY'), 78000, 9, 39);
+INSERT INTO ALQUILERES VALUES (TO_DATE('30/01/2014', 'DD/MM/YYYY'), TO_DATE('31/01/2014', 'DD/MM/YYYY'), 79000, 1, 30);

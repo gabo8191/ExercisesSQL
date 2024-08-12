@@ -1,0 +1,153 @@
+/* Un bloque de programación PL/SQL que liste los mantenimientos a realizar en
+las canchas que tengan un estado Regular o Malo. El mantenimiento a realizar es
+el almacenado en la descripción del estado de la cancha. */
+SET SERVEROUTPUT ON;
+
+DECLARE
+    CURSOR mantenimiento_cur IS
+        SELECT c.id_cancha,
+               e.nombre_estado,
+               e.descripcion_estado
+        FROM canchas c
+        JOIN estados_cancha e ON c.id_estado = e.id_estado
+        WHERE e.nombre_estado IN ('R', 'M');
+BEGIN
+    FOR mantenimiento_rec IN mantenimiento_cur LOOP
+        DBMS_OUTPUT.PUT_LINE('ID Cancha: ' || mantenimiento_rec.id_cancha || 
+                             ', Estado: ' || mantenimiento_rec.nombre_estado || 
+                             ', Descripción: ' || mantenimiento_rec.descripcion_estado);
+    END LOOP;
+END;
+
+/*
+Un bloque de programación PL/SQL que devuelva el top – n de barrios más
+productivos, entienda por barrio productivo el que mayor dinero ha generado en
+alquileres. El valor de n es ingresado por el usuario. 
+*/
+
+DECLARE
+   -- n NUMBER := &n; 
+    -- Valor ingresado por el usuario
+    n NUMBER :=10;
+    CURSOR top_barrios_cur IS
+        SELECT l.nombre_lugar,
+               SUM(a.costo_alquiler) AS total_ingresos
+        FROM alquileres a
+        JOIN canchas c ON a.id_cancha = c.id_cancha
+        JOIN complejos co ON c.id_complejo = co.id_complejo
+        JOIN lugares l ON co.id_lugar = l.id_lugar
+        WHERE l.tipo_lugar = 'B'
+        GROUP BY l.nombre_lugar
+        ORDER BY total_ingresos DESC
+        FETCH FIRST n ROWS ONLY;
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Top ' || n || ' Barrios Más Productivos:');
+    FOR barrio_rec IN top_barrios_cur LOOP
+        DBMS_OUTPUT.PUT_LINE('Barrio: ' || barrio_rec.nombre_lugar || 
+                             ', Ingresos: ' || barrio_rec.total_ingresos);
+    END LOOP;
+END;
+
+
+/*
+Un TRIGGER que permita almacenar en una tabla AUDITORA_CANCHAS
+aquellas canchas que cambien de id_estado. En esta tabla deben existir los
+siguientes campos: id_cancha, tipo_cancha, estado_viejo, estado_nuevo,
+fecha_cambio
+*/
+
+CREATE TABLE AUDITORA_CANCHAS (
+    id_auditora    NUMBER PRIMARY KEY,
+    id_cancha      NUMBER NOT NULL,
+    tipo_cancha    CHAR(2) NOT NULL,
+    estado_viejo   NUMBER NOT NULL,
+    estado_nuevo   NUMBER NOT NULL,
+    fecha_cambio   DATE NOT NULL
+);
+
+CREATE SEQUENCE auditora_canchas_seq
+START WITH 1
+INCREMENT BY 1
+NOCACHE
+NOCYCLE;
+
+CREATE OR REPLACE TRIGGER trg_audit_canchas
+AFTER UPDATE OF id_estado ON canchas
+FOR EACH ROW
+DECLARE
+    v_fecha_cambio DATE := SYSDATE;
+BEGIN
+    IF :OLD.id_estado != :NEW.id_estado THEN
+        INSERT INTO AUDITORA_CANCHAS (
+            id_auditora, id_cancha, tipo_cancha, estado_viejo, estado_nuevo, fecha_cambio
+        ) VALUES (
+            auditora_canchas_seq.NEXTVAL, -- Utilizamos la secuencia para el id_auditora
+            :NEW.id_cancha,
+            :NEW.tipo_cancha,
+            :OLD.id_estado,
+            :NEW.id_estado,
+            v_fecha_cambio
+        );
+    END IF;
+END;
+
+-- Actualizamos el estado de la cancha de 1 a 2
+UPDATE canchas SET id_estado = 1 WHERE id_cancha = 2;
+
+-- Verificamos si el cambio se registró en AUDITORA_CANCHAS
+SELECT * FROM AUDITORA_CANCHAS;
+
+/*
+Un bloque de programación PL/SQL que ingresado un id_cliente retorne el
+nombre del mes (en árabe) en el que más veces ha alquilado canchas.
+*/
+
+SELECT * FROM ALQUILERES;
+
+DECLARE
+    v_id_cliente clientes.id_cliente%TYPE := 2; -- Ingresa el id_cliente
+    v_mes_maximo VARCHAR2(20);
+BEGIN
+    SELECT TO_CHAR(to_date(mes, 'MM'), 'Month', 'NLS_DATE_LANGUAGE=Arabic') INTO v_mes_maximo
+    FROM (
+        SELECT EXTRACT(MONTH FROM fecha_inicial) AS mes,
+               COUNT(*) AS total_alquileres
+        FROM alquileres a
+        INNER JOIN canchas c ON a.id_cancha = c.id_cancha
+        WHERE a.id_cliente = v_id_cliente
+        GROUP BY EXTRACT(MONTH FROM fecha_inicial)
+        ORDER BY COUNT(*) DESC
+    )
+    WHERE ROWNUM = 1;
+
+    DBMS_OUTPUT.PUT_LINE('El mes en que ' || v_id_cliente || ' ha alquilado más canchas es: ' || v_mes_maximo);
+END;
+
+/*
+Un TRIGGER que no permita ingresar ni eliminar empleados desde las 8:00 AM
+hasta las 10:00 PM
+*/
+
+CREATE OR REPLACE TRIGGER control_empleados_horario
+BEFORE INSERT OR DELETE ON empleados
+FOR EACH ROW
+DECLARE
+    v_hora_actual VARCHAR2(20); -- Aumentar el tamaño del buffer
+BEGIN
+    -- Obtener la hora actual del sistema
+    SELECT TO_CHAR(SYSDATE, 'HH24:MI:SS') INTO v_hora_actual FROM dual;
+
+    -- Convertir la hora actual en formato de 24 horas a AM/PM
+    v_hora_actual := TO_CHAR(TO_DATE(v_hora_actual, 'HH24:MI:SS'), 'HH12:MI:SS AM');
+
+    -- Si la hora actual está entre las 8:00 AM y las 10:00 PM, mostrar un mensaje de error
+    IF TO_DATE(v_hora_actual, 'HH12:MI:SS AM') BETWEEN TO_DATE('08:00:00 AM', 'HH12:MI:SS AM') AND TO_DATE('10:00:00 PM', 'HH12:MI:SS PM') THEN
+        RAISE_APPLICATION_ERROR(-20001, 'No se pueden insertar ni eliminar empleados entre las 8:00 AM y las 10:00 PM');
+    END IF;
+END;
+
+
+INSERT INTO empleados (id_empleado, nombre_empleado, apellido_empleado, numero_documento, tipo_documento, telefono_empleado, tipo_empleado, id_complejo)
+VALUES (1, 'Juan', 'Perez', '123456789', 'CC', '1234567890', 'AD', 1);
+
+
